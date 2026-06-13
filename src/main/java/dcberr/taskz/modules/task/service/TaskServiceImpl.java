@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dcberr.taskz.common.enums.TaskStatus;
+import dcberr.taskz.modules.task.dto.CreateTaskRequest;
 import dcberr.taskz.modules.task.dto.TaskDetailResponse;
 import dcberr.taskz.modules.task.dto.TaskResponse;
 import dcberr.taskz.modules.task.dto.UpdateTaskStatusRequest;
@@ -31,6 +33,21 @@ public class TaskServiceImpl implements TaskService {
                 .map(TaskMapper::toResponse)
                 .toList();
     }
+    @Override
+        public void createTask(
+                CreateTaskRequest request
+        ) {
+
+        Task task = Task.builder()
+                .title(request.title())
+                .description(request.description())
+                .requester(request.requester())
+                .priority(request.priority())
+                .status(TaskStatus.OPEN)
+                .build();
+
+        taskRepository.save(task);
+        }
 
     @Override
     @Transactional(readOnly = true)
