@@ -1,0 +1,11 @@
+ALTER TABLE tasks
+ADD COLUMN ai_confidence DOUBLE PRECISION;
+
+ALTER TABLE tasks
+ADD COLUMN source VARCHAR(50);
+
+ALTER TABLE tasks
+ADD COLUMN source_message_id VARCHAR(255);
+
+ALTER TABLE tasks
+ADD COLUMN completed_at TIMESTAMP;

@@ -1,12 +1,12 @@
 package dcberr.taskz.modules.task.dto;
 
-import dcberr.taskz.common.enums.TaskStatus;
+import dcberr.taskz.common.enums.Priority;
 import jakarta.validation.constraints.NotNull;
 
-public record UpdateTaskStatusRequest(
+public record UpdateTaskPriorityRequest(
 
         @NotNull
-        TaskStatus status
+        Priority priority
 
 ) {
 }

@@ -1,0 +1,2 @@
+ALTER TABLE tasks
+ADD COLUMN assignee VARCHAR(255);

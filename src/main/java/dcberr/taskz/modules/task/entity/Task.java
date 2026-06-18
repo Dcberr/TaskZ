@@ -1,7 +1,11 @@
 package dcberr.taskz.modules.task.entity;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+
 import dcberr.taskz.common.entity.BaseEntity;
 import dcberr.taskz.common.enums.Priority;
+import dcberr.taskz.common.enums.TaskSource;
 import dcberr.taskz.common.enums.TaskStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,4 +41,22 @@ public class Task extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
+
+    @Column(name = "ai_confidence")
+    private Double aiConfidence;
+
+    @Enumerated(EnumType.STRING)
+    private TaskSource source;
+
+    @Column(name = "source_message_id")
+    private String sourceMessageId;
+
+    @Column
+    private String assignee;
+
+    @Column(name = "due_date_time")
+    private OffsetDateTime dueDateTime;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
 }

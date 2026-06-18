@@ -1,6 +1,9 @@
 package dcberr.taskz.modules.task.dto;
 
+import java.time.OffsetDateTime;
+
 import dcberr.taskz.common.enums.Priority;
+import dcberr.taskz.common.enums.TaskSource;
 
 public record CreateTaskRequest(
 
@@ -10,7 +13,16 @@ public record CreateTaskRequest(
 
         String requester,
 
-        Priority priority
+        String assignee,
 
+        Priority priority,
+
+        OffsetDateTime dueDateTime,
+
+        Double aiConfidence,
+
+        TaskSource source,
+
+        String sourceMessageId
 ) {
 }

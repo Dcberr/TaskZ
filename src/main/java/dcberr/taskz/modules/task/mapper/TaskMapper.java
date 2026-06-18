@@ -25,9 +25,16 @@ public class TaskMapper {
                 task.getTitle(),
                 task.getDescription(),
                 task.getRequester(),
+                task.getAssignee(),
                 task.getPriority(),
                 task.getStatus(),
-                task.getCreatedAt()
+                task.getDueDateTime(),
+                task.getAiConfidence(),
+                task.getSource(),
+                task.getSourceMessageId(),
+                task.getCreatedAt(),
+                task.getUpdatedAt(),
+                task.getCompletedAt()
         );
     }
 }
