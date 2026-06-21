@@ -5,13 +5,13 @@ import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 
 import dcberr.taskz.common.enums.Priority;
-import dcberr.taskz.common.enums.TaskSource;
 import dcberr.taskz.modules.ai.client.AIClient;
 import dcberr.taskz.modules.ai.dto.AnalyzeResponse;
 import dcberr.taskz.modules.task.dto.CreateTaskRequest;
 import dcberr.taskz.modules.task.mapper.PriorityMapper;
 import dcberr.taskz.modules.task.service.TaskService;
 import dcberr.taskz.modules.workflow.dto.MessageContext;
+import dcberr.taskz.modules.workflow.mapper.MessageSourceMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,9 +80,12 @@ public class TaskCreationWorkflowImpl
 
                     analysis.confidence(),
 
-                    TaskSource.MOCK,
+                    MessageSourceMapper.toTaskSource(context.source()),
 
-                    context.messageId().toString()
+                    context.externalMessageId() != null &&
+                            !context.externalMessageId().isBlank()
+                            ? context.externalMessageId()
+                            : context.messageId().toString()
             );
 
         taskService.createTask(

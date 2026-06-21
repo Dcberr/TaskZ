@@ -1,24 +1,29 @@
 package dcberr.taskz.modules.task.service;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dcberr.taskz.common.dto.PageResponse;
 import dcberr.taskz.common.enums.Priority;
-import dcberr.taskz.common.enums.TaskStatus;
 import dcberr.taskz.common.enums.TaskSource;
+import dcberr.taskz.common.enums.TaskStatus;
 import dcberr.taskz.modules.task.dto.CreateTaskRequest;
+import dcberr.taskz.modules.task.dto.TaskDetailResponse;
+import dcberr.taskz.modules.task.dto.TaskQueryFilter;
+import dcberr.taskz.modules.task.dto.TaskResponse;
 import dcberr.taskz.modules.task.dto.UpdateTaskAssigneeRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskPriorityRequest;
-import dcberr.taskz.modules.task.dto.TaskDetailResponse;
-import dcberr.taskz.modules.task.dto.TaskResponse;
 import dcberr.taskz.modules.task.dto.UpdateTaskStatusRequest;
 import dcberr.taskz.modules.task.entity.Task;
 import dcberr.taskz.modules.task.exception.TaskNotFoundException;
 import dcberr.taskz.modules.task.mapper.TaskMapper;
 import dcberr.taskz.modules.task.repository.TaskRepository;
+import dcberr.taskz.modules.task.specification.TaskSpecifications;
 import dcberr.taskz.modules.task.validator.TaskStatusTransitionValidator;
 import lombok.RequiredArgsConstructor;
 
@@ -28,15 +33,54 @@ import lombok.RequiredArgsConstructor;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskEventService taskEventService;
 
     @Override
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAllTasks() {
+    public PageResponse<TaskResponse> getTasks(
+            TaskQueryFilter filter,
+            Pageable pageable
+    ) {
 
-        return taskRepository.findAll()
-                .stream()
-                .map(TaskMapper::toResponse)
-                .toList();
+        return readTasks(filter, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<TaskResponse> getOpenTasks(
+            TaskQueryFilter filter,
+            Pageable pageable
+    ) {
+
+        return readTasks(
+                TaskQueryFilter.of(
+                        Set.of(
+                                TaskStatus.OPEN,
+                                TaskStatus.IN_PROGRESS,
+                                TaskStatus.BLOCKED
+                        ),
+                        filter.priority(),
+                        filter.assignee()
+                ),
+                pageable
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<TaskResponse> getCompletedTasks(
+            TaskQueryFilter filter,
+            Pageable pageable
+    ) {
+
+        return readTasks(
+                TaskQueryFilter.of(
+                        Set.of(TaskStatus.COMPLETED),
+                        filter.priority(),
+                        filter.assignee()
+                ),
+                pageable
+        );
     }
     @Override
     public void createTask(
@@ -56,8 +100,9 @@ public class TaskServiceImpl implements TaskService {
                 .sourceMessageId(request.sourceMessageId())
                 .build();
 
-        taskRepository.save(task);
-        }
+        Task savedTask = taskRepository.save(task);
+        taskEventService.recordTaskCreated(savedTask);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -72,6 +117,24 @@ public class TaskServiceImpl implements TaskService {
         return TaskMapper.toDetailResponse(task);
     }
 
+    private PageResponse<TaskResponse> readTasks(
+            TaskQueryFilter filter,
+            Pageable pageable
+    ) {
+
+        return PageResponse.from(
+                taskRepository.findAll(
+                                TaskSpecifications.andAll(
+                                        filter.statuses(),
+                                        filter.priority(),
+                                        filter.assignee()
+                                ),
+                                pageable
+                        )
+                        .map(TaskMapper::toResponse)
+        );
+    }
+
     @Override
     public void updateStatus(
             UUID taskId,
@@ -84,6 +147,9 @@ public class TaskServiceImpl implements TaskService {
                                 "Task not found: " + taskId
                         ));
 
+        TaskStatus oldStatus = task.getStatus();
+        LocalDateTime oldCompletedAt = task.getCompletedAt();
+
         TaskStatusTransitionValidator.validate(task.getStatus(), request.status());
 
         task.setStatus(request.status());
@@ -91,7 +157,14 @@ public class TaskServiceImpl implements TaskService {
                 ? java.time.LocalDateTime.now()
                 : null);
 
-        taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        taskEventService.recordStatusChanged(
+                savedTask.getId(),
+                oldStatus,
+                oldCompletedAt,
+                savedTask.getStatus(),
+                savedTask.getCompletedAt()
+        );
     }
 
     @Override
@@ -106,8 +179,15 @@ public class TaskServiceImpl implements TaskService {
                                 "Task not found: " + taskId
                         ));
 
+        Priority oldPriority = task.getPriority();
+
         task.setPriority(request.priority());
-        taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        taskEventService.recordPriorityChanged(
+                savedTask.getId(),
+                oldPriority,
+                savedTask.getPriority()
+        );
     }
 
     @Override
@@ -122,7 +202,14 @@ public class TaskServiceImpl implements TaskService {
                                 "Task not found: " + taskId
                         ));
 
+        String oldAssignee = task.getAssignee();
+
         task.setAssignee(request.assignee());
-        taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        taskEventService.recordAssigneeChanged(
+                savedTask.getId(),
+                oldAssignee,
+                savedTask.getAssignee()
+        );
     }
 }

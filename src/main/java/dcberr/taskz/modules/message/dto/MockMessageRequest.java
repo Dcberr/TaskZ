@@ -8,7 +8,13 @@ public record MockMessageRequest(
         String sender,
 
         @NotBlank
-        String content
+        String content,
+
+        String channelName,
+
+        String conversationId,
+
+        String externalMessageId
 
 ) {
 }

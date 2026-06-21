@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import dcberr.taskz.modules.task.exception.InvalidTaskStatusTransitionException;
+import dcberr.taskz.modules.task.exception.InvalidTaskSortFieldException;
 import dcberr.taskz.modules.task.exception.TaskNotFoundException;
 
 @RestControllerAdvice
@@ -29,6 +30,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidTaskStatusTransitionException.class)
     public ResponseEntity<?> handleInvalidTaskStatusTransition(
             InvalidTaskStatusTransitionException ex
+    ) {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "message",
+                        ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(InvalidTaskSortFieldException.class)
+    public ResponseEntity<?> handleInvalidTaskSortField(
+            InvalidTaskSortFieldException ex
     ) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

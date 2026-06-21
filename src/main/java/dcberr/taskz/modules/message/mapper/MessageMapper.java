@@ -15,6 +15,10 @@ public class MessageMapper {
                 message.getId(),
                 message.getSender(),
                 message.getContent(),
+                message.getSource(),
+                message.getChannelName(),
+                message.getConversationId(),
+                message.getExternalMessageId(),
                 message.getProcessed(),
                 message.getCreatedAt()
         );

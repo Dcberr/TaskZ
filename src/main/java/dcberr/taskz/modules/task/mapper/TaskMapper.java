@@ -12,6 +12,8 @@ public class TaskMapper {
                 task.getId(),
                 task.getTitle(),
                 task.getRequester(),
+                task.getAssignee(),
+                task.getDueDateTime(),
                 task.getPriority(),
                 task.getStatus(),
                 task.getCreatedAt()

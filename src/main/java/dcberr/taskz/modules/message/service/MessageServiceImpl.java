@@ -3,8 +3,8 @@ package dcberr.taskz.modules.message.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dcberr.taskz.modules.message.dto.InboundMessageCommand;
 import dcberr.taskz.modules.message.dto.MessageResponse;
-import dcberr.taskz.modules.message.dto.MockMessageRequest;
 import dcberr.taskz.modules.message.entity.RawMessage;
 import dcberr.taskz.modules.message.mapper.MessageMapper;
 import dcberr.taskz.modules.message.repository.RawMessageRepository;
@@ -25,29 +25,46 @@ public class MessageServiceImpl
 
     @Override
     public MessageResponse receiveMessage(
-            MockMessageRequest request
+            InboundMessageCommand command
     ) {
 
         log.info(
-                "Received mock message from {}",
-                request.sender()
+                "Received {} message from {}",
+                command.source(),
+                command.sender()
         );
 
         RawMessage message =
                 RawMessage.builder()
-                        .sender(request.sender())
-                        .content(request.content())
+                        .sender(command.sender())
+                        .content(command.content())
+                        .source(command.source())
+                        .channelName(command.channelName())
+                        .conversationId(command.conversationId())
+                        .externalMessageId(command.externalMessageId())
                         .processed(false)
                         .build();
 
         RawMessage saved =
                 rawMessageRepository.save(message);
 
+        if (saved.getExternalMessageId() == null ||
+                saved.getExternalMessageId().isBlank()) {
+                saved.setExternalMessageId(
+                        saved.getId().toString()
+                );
+                saved = rawMessageRepository.save(saved);
+        }
+
         taskCreationWorkflow.processMessage(
                 new MessageContext(
                         saved.getId(),
                         saved.getSender(),
-                        saved.getContent()
+                        saved.getContent(),
+                        saved.getSource(),
+                        saved.getChannelName(),
+                        saved.getConversationId(),
+                        saved.getExternalMessageId()
                 )
         );
 

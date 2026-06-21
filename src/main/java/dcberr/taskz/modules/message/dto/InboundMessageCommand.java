@@ -1,24 +1,13 @@
-package dcberr.taskz.modules.workflow.dto;
-
-import java.util.UUID;
+package dcberr.taskz.modules.message.dto;
 
 import dcberr.taskz.common.enums.MessageSource;
 
-public record MessageContext(
-
-        UUID messageId,
-
+public record InboundMessageCommand(
         String sender,
-
         String content,
-
         MessageSource source,
-
         String channelName,
-
         String conversationId,
-
         String externalMessageId
-
 ) {
 }
