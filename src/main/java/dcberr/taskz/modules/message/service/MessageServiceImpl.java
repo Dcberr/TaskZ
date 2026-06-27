@@ -64,7 +64,9 @@ public class MessageServiceImpl
                         saved.getSource(),
                         saved.getChannelName(),
                         saved.getConversationId(),
-                        saved.getExternalMessageId()
+                        saved.getExternalMessageId(),
+                        command.conversationMessages(),
+                        command.participants()
                 )
         );
 

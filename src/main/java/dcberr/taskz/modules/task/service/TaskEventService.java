@@ -26,7 +26,11 @@ public interface TaskEventService {
 
     void recordPriorityChanged(UUID taskId, Priority oldPriority, Priority newPriority);
 
-    void recordAssigneeChanged(UUID taskId, String oldAssignee, String newAssignee);
+    void recordAssigneesChanged(
+            UUID taskId,
+            List<String> oldAssignees,
+            List<String> newAssignees
+    );
 
     PageResponse<TaskEventResponse> getEventsByTaskId(UUID taskId, Pageable pageable);
 }

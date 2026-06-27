@@ -1,5 +1,6 @@
 package dcberr.taskz.modules.task.controller;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ import dcberr.taskz.modules.task.dto.TaskDetailResponse;
 import dcberr.taskz.modules.task.dto.TaskQueryFilter;
 import dcberr.taskz.modules.task.dto.TaskResponse;
 import dcberr.taskz.modules.task.dto.TaskEventResponse;
-import dcberr.taskz.modules.task.dto.UpdateTaskAssigneeRequest;
+import dcberr.taskz.modules.task.dto.UpdateTaskAssigneesRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskPriorityRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskStatusRequest;
 import dcberr.taskz.modules.task.exception.InvalidTaskSortFieldException;
@@ -41,7 +42,6 @@ public class TaskController {
             "id",
             "title",
             "requester",
-            "assignee",
             "dueDateTime",
             "priority",
             "status",
@@ -65,8 +65,8 @@ public class TaskController {
             TaskStatus status,
             @RequestParam(required = false)
             Priority priority,
-            @RequestParam(required = false)
-            String assignee,
+            @RequestParam(name = "assignees", required = false)
+            List<String> assignees,
             @RequestParam(defaultValue = "0")
             int page,
             @RequestParam(defaultValue = "20")
@@ -81,7 +81,7 @@ public class TaskController {
                 TaskQueryFilter.of(
                         status == null ? Set.of() : Set.of(status),
                         priority,
-                        assignee
+                        assignees
                 ),
                 toPageRequest(
                         page,
@@ -130,8 +130,8 @@ public class TaskController {
     public PageResponse<TaskResponse> getOpenTasks(
             @RequestParam(required = false)
             Priority priority,
-            @RequestParam(required = false)
-            String assignee,
+            @RequestParam(name = "assignees", required = false)
+            List<String> assignees,
             @RequestParam(defaultValue = "0")
             int page,
             @RequestParam(defaultValue = "20")
@@ -143,7 +143,7 @@ public class TaskController {
     ) {
 
         return taskService.getOpenTasks(
-                TaskQueryFilter.of(Set.of(), priority, assignee),
+                TaskQueryFilter.of(Set.of(), priority, assignees),
                 toPageRequest(
                         page,
                         size,
@@ -158,8 +158,8 @@ public class TaskController {
     public PageResponse<TaskResponse> getCompletedTasks(
             @RequestParam(required = false)
             Priority priority,
-            @RequestParam(required = false)
-            String assignee,
+            @RequestParam(name = "assignees", required = false)
+            List<String> assignees,
             @RequestParam(defaultValue = "0")
             int page,
             @RequestParam(defaultValue = "20")
@@ -171,7 +171,7 @@ public class TaskController {
     ) {
 
         return taskService.getCompletedTasks(
-                TaskQueryFilter.of(Set.of(), priority, assignee),
+                TaskQueryFilter.of(Set.of(), priority, assignees),
                 toPageRequest(
                         page,
                         size,
@@ -204,13 +204,13 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{taskId:[0-9a-fA-F\\-]{36}}/assignee")
-    public ResponseEntity<Void> updateAssignee(
+    @PatchMapping("/{taskId:[0-9a-fA-F\\-]{36}}/assignees")
+    public ResponseEntity<Void> updateAssignees(
             @PathVariable UUID taskId,
-            @Valid @RequestBody UpdateTaskAssigneeRequest request
+            @Valid @RequestBody UpdateTaskAssigneesRequest request
     ) {
 
-        taskService.updateAssignee(taskId, request);
+        taskService.updateAssignees(taskId, request);
 
         return ResponseEntity.noContent().build();
     }

@@ -86,18 +86,18 @@ public class TaskEventServiceImpl implements TaskEventService {
     }
 
     @Override
-    public void recordAssigneeChanged(
+    public void recordAssigneesChanged(
             UUID taskId,
-            String oldAssignee,
-            String newAssignee
+            List<String> oldAssignees,
+            List<String> newAssignees
     ) {
 
         taskEventRepository.save(
                 TaskEvent.builder()
                         .taskId(taskId)
-                        .eventType(TaskEventType.ASSIGNEE_CHANGED)
-                        .oldValue(toJson(valueMap("assignee", oldAssignee)))
-                        .newValue(toJson(valueMap("assignee", newAssignee)))
+                        .eventType(TaskEventType.ASSIGNEES_CHANGED)
+                        .oldValue(toJson(valueMap("assignees", oldAssignees)))
+                        .newValue(toJson(valueMap("assignees", newAssignees)))
                         .build()
         );
     }
@@ -125,7 +125,7 @@ public class TaskEventServiceImpl implements TaskEventService {
         snapshot.put("title", task.getTitle());
         snapshot.put("description", task.getDescription());
         snapshot.put("requester", task.getRequester());
-        snapshot.put("assignee", task.getAssignee());
+        snapshot.put("assignees", task.getAssignees());
         snapshot.put("dueDateTime", task.getDueDateTime());
         snapshot.put("priority", task.getPriority());
         snapshot.put("status", task.getStatus());
@@ -160,6 +160,10 @@ public class TaskEventServiceImpl implements TaskEventService {
             return mapToJson(map);
         }
 
+        if (value instanceof List<?> list) {
+            return listToJson(list);
+        }
+
         return "\"" + escapeJson(value.toString()) + "\"";
     }
 
@@ -192,11 +196,32 @@ public class TaskEventServiceImpl implements TaskEventService {
             return mapToJson(map);
         }
 
+        if (value instanceof List<?> list) {
+            return listToJson(list);
+        }
+
         if (value instanceof Number || value instanceof Boolean) {
             return value.toString();
         }
 
         return "\"" + escapeJson(value.toString()) + "\"";
+    }
+
+    private String listToJson(List<?> list) {
+        StringBuilder builder = new StringBuilder("[");
+        boolean first = true;
+
+        for (Object item : list) {
+            if (!first) {
+                builder.append(',');
+            }
+
+            first = false;
+            builder.append(toJsonValue(item));
+        }
+
+        builder.append(']');
+        return builder.toString();
     }
 
     private String escapeJson(String value) {

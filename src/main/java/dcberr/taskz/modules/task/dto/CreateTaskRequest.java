@@ -1,6 +1,7 @@
 package dcberr.taskz.modules.task.dto;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import dcberr.taskz.common.enums.Priority;
 import dcberr.taskz.common.enums.TaskSource;
@@ -13,7 +14,7 @@ public record CreateTaskRequest(
 
         String requester,
 
-        String assignee,
+        List<String> assignees,
 
         Priority priority,
 
@@ -25,4 +26,7 @@ public record CreateTaskRequest(
 
         String sourceMessageId
 ) {
+    public CreateTaskRequest {
+        assignees = assignees == null ? List.of() : List.copyOf(assignees);
+    }
 }

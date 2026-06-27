@@ -1,5 +1,6 @@
 package dcberr.taskz.modules.workflow.dto;
 
+import java.util.List;
 import java.util.UUID;
 
 import dcberr.taskz.common.enums.MessageSource;
@@ -18,7 +19,11 @@ public record MessageContext(
 
         String conversationId,
 
-        String externalMessageId
+        String externalMessageId,
+
+        List<String> conversationMessages,
+
+        List<String> participants
 
 ) {
 }

@@ -1,5 +1,7 @@
 package dcberr.taskz.modules.message.dto;
 
+import java.util.List;
+
 import dcberr.taskz.common.enums.MessageSource;
 
 public record InboundMessageCommand(
@@ -8,6 +10,8 @@ public record InboundMessageCommand(
         MessageSource source,
         String channelName,
         String conversationId,
-        String externalMessageId
+        String externalMessageId,
+        List<String> participants,
+        List<String> conversationMessages
 ) {
 }

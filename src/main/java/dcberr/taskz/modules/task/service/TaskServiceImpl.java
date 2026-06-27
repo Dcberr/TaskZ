@@ -1,6 +1,8 @@
 package dcberr.taskz.modules.task.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,7 +18,7 @@ import dcberr.taskz.modules.task.dto.CreateTaskRequest;
 import dcberr.taskz.modules.task.dto.TaskDetailResponse;
 import dcberr.taskz.modules.task.dto.TaskQueryFilter;
 import dcberr.taskz.modules.task.dto.TaskResponse;
-import dcberr.taskz.modules.task.dto.UpdateTaskAssigneeRequest;
+import dcberr.taskz.modules.task.dto.UpdateTaskAssigneesRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskPriorityRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskStatusRequest;
 import dcberr.taskz.modules.task.entity.Task;
@@ -24,6 +26,7 @@ import dcberr.taskz.modules.task.exception.TaskNotFoundException;
 import dcberr.taskz.modules.task.mapper.TaskMapper;
 import dcberr.taskz.modules.task.repository.TaskRepository;
 import dcberr.taskz.modules.task.specification.TaskSpecifications;
+import dcberr.taskz.modules.task.support.TaskAssignees;
 import dcberr.taskz.modules.task.validator.TaskStatusTransitionValidator;
 import lombok.RequiredArgsConstructor;
 
@@ -60,7 +63,7 @@ public class TaskServiceImpl implements TaskService {
                                 TaskStatus.BLOCKED
                         ),
                         filter.priority(),
-                        filter.assignee()
+                        filter.assignees()
                 ),
                 pageable
         );
@@ -77,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
                 TaskQueryFilter.of(
                         Set.of(TaskStatus.COMPLETED),
                         filter.priority(),
-                        filter.assignee()
+                        filter.assignees()
                 ),
                 pageable
         );
@@ -91,7 +94,7 @@ public class TaskServiceImpl implements TaskService {
                 .title(request.title())
                 .description(request.description())
                 .requester(request.requester())
-                .assignee(request.assignee())
+                .assignees(new ArrayList<>(TaskAssignees.normalize(request.assignees())))
                 .priority(request.priority())
                 .status(TaskStatus.OPEN)
                 .dueDateTime(request.dueDateTime())
@@ -127,7 +130,7 @@ public class TaskServiceImpl implements TaskService {
                                 TaskSpecifications.andAll(
                                         filter.statuses(),
                                         filter.priority(),
-                                        filter.assignee()
+                                        filter.assignees()
                                 ),
                                 pageable
                         )
@@ -191,9 +194,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void updateAssignee(
+    public void updateAssignees(
             UUID taskId,
-            UpdateTaskAssigneeRequest request
+            UpdateTaskAssigneesRequest request
     ) {
 
         Task task = taskRepository.findById(taskId)
@@ -202,14 +205,15 @@ public class TaskServiceImpl implements TaskService {
                                 "Task not found: " + taskId
                         ));
 
-        String oldAssignee = task.getAssignee();
+        List<String> oldAssignees = TaskAssignees.normalize(task.getAssignees());
+        List<String> newAssignees = TaskAssignees.normalize(request.assignees());
 
-        task.setAssignee(request.assignee());
+        task.setAssignees(new ArrayList<>(newAssignees));
         Task savedTask = taskRepository.save(task);
-        taskEventService.recordAssigneeChanged(
+        taskEventService.recordAssigneesChanged(
                 savedTask.getId(),
-                oldAssignee,
-                savedTask.getAssignee()
+                oldAssignees,
+                savedTask.getAssignees()
         );
     }
 }

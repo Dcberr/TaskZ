@@ -33,7 +33,9 @@ public class MockMessageProvider implements MessageProvider {
                         source(),
                         request.channelName(),
                         request.conversationId(),
-                        request.externalMessageId()
+                        request.externalMessageId(),
+                        request.conversationMessages(),
+                        request.participants()
                 )
         );
     }

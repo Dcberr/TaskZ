@@ -2,15 +2,22 @@ package dcberr.taskz.modules.task.entity;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import dcberr.taskz.common.entity.BaseEntity;
 import dcberr.taskz.common.enums.Priority;
 import dcberr.taskz.common.enums.TaskSource;
 import dcberr.taskz.common.enums.TaskStatus;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,8 +58,15 @@ public class Task extends BaseEntity {
     @Column(name = "source_message_id")
     private String sourceMessageId;
 
-    @Column
-    private String assignee;
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "task_assignees",
+            joinColumns = @JoinColumn(name = "task_id")
+    )
+    @OrderColumn(name = "position")
+    @Column(name = "assignee", nullable = false)
+    private List<String> assignees = new ArrayList<>();
 
     @Column(name = "due_date_time")
     private OffsetDateTime dueDateTime;

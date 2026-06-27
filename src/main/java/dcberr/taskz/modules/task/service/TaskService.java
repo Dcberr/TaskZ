@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import dcberr.taskz.common.dto.PageResponse;
 import dcberr.taskz.modules.task.dto.CreateTaskRequest;
-import dcberr.taskz.modules.task.dto.UpdateTaskAssigneeRequest;
+import dcberr.taskz.modules.task.dto.UpdateTaskAssigneesRequest;
 import dcberr.taskz.modules.task.dto.UpdateTaskPriorityRequest;
 import dcberr.taskz.modules.task.dto.TaskDetailResponse;
 import dcberr.taskz.modules.task.dto.TaskResponse;
@@ -27,7 +27,7 @@ public interface TaskService {
 
     void updatePriority(UUID taskId, UpdateTaskPriorityRequest request);
 
-    void updateAssignee(UUID taskId, UpdateTaskAssigneeRequest request);
+    void updateAssignees(UUID taskId, UpdateTaskAssigneesRequest request);
 
     void createTask(CreateTaskRequest request);
 }

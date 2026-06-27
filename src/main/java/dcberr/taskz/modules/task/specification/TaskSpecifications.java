@@ -1,5 +1,7 @@
 package dcberr.taskz.modules.task.specification;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -7,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import dcberr.taskz.common.enums.Priority;
 import dcberr.taskz.common.enums.TaskStatus;
 import dcberr.taskz.modules.task.entity.Task;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Join;
 
 public final class TaskSpecifications {
 
@@ -28,23 +30,31 @@ public final class TaskSpecifications {
                 priority == null ? cb.conjunction() : cb.equal(root.get("priority"), priority);
     }
 
-    public static Specification<Task> withAssignee(String assignee) {
+    public static Specification<Task> withAssignees(List<String> assignees) {
         return (root, query, cb) -> {
-            if (assignee == null || assignee.isBlank()) {
+            if (assignees == null || assignees.isEmpty()) {
                 return cb.conjunction();
             }
 
-            return cb.equal(cb.lower(root.get("assignee")), assignee.toLowerCase());
+            if (query != null) {
+                query.distinct(true);
+            }
+
+            Join<Task, String> assigneeJoin = root.join("assignees");
+            return cb.lower(assigneeJoin)
+                    .in(assignees.stream()
+                            .map(assignee -> assignee.toLowerCase(Locale.ROOT))
+                            .toList());
         };
     }
 
     public static Specification<Task> andAll(
             Set<TaskStatus> statuses,
             Priority priority,
-            String assignee
+            List<String> assignees
     ) {
         return Specification.where(withStatuses(statuses))
                 .and(withPriority(priority))
-                .and(withAssignee(assignee));
+                .and(withAssignees(assignees));
     }
 }

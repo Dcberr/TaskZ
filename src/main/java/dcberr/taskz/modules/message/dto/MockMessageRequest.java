@@ -1,5 +1,7 @@
 package dcberr.taskz.modules.message.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 
 public record MockMessageRequest(
@@ -14,7 +16,11 @@ public record MockMessageRequest(
 
         String conversationId,
 
-        String externalMessageId
+        String externalMessageId,
+
+        List<String> conversationMessages,
+
+        List<String> participants 
 
 ) {
 }

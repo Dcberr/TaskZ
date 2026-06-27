@@ -1,14 +1,14 @@
 ALTER TABLE raw_messages
-ADD COLUMN source VARCHAR(50);
+ADD COLUMN IF NOT EXISTS source VARCHAR(50);
 
 ALTER TABLE raw_messages
-ADD COLUMN channel_name VARCHAR(255);
+ADD COLUMN IF NOT EXISTS channel_name VARCHAR(255);
 
 ALTER TABLE raw_messages
-ADD COLUMN conversation_id VARCHAR(255);
+ADD COLUMN IF NOT EXISTS conversation_id VARCHAR(255);
 
 ALTER TABLE raw_messages
-ADD COLUMN external_message_id VARCHAR(255);
+ADD COLUMN IF NOT EXISTS external_message_id VARCHAR(255);
 
 UPDATE raw_messages
 SET source = 'MOCK'

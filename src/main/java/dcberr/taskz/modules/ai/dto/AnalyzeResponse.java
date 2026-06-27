@@ -1,5 +1,7 @@
 package dcberr.taskz.modules.ai.dto;
 
+import java.util.List;
+
 public record AnalyzeResponse(
         boolean isTask,
 
@@ -9,10 +11,13 @@ public record AnalyzeResponse(
 
         String description,
 
-        String assignee,
+        List<String> assignees,
 
         String dueDateTime,
 
         String priority
 ) {
+    public AnalyzeResponse {
+        assignees = assignees == null ? List.of() : List.copyOf(assignees);
+    }
 }

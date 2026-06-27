@@ -2,6 +2,7 @@ package dcberr.taskz.modules.task.dto;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import dcberr.taskz.common.enums.Priority;
@@ -13,7 +14,7 @@ public record TaskDetailResponse(
         String title,
         String description,
         String requester,
-        String assignee,
+        List<String> assignees,
         Priority priority,
         TaskStatus status,
         OffsetDateTime dueDateTime,
@@ -24,4 +25,7 @@ public record TaskDetailResponse(
         LocalDateTime updatedAt,
         LocalDateTime completedAt
 ) {
+    public TaskDetailResponse {
+        assignees = assignees == null ? List.of() : List.copyOf(assignees);
+    }
 }
